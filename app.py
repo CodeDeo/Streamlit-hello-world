@@ -1,4 +1,36 @@
-with st.expander("View dice rolls", expanded=True):
+"""Streamlit entry point for Character Forge."""
+import streamlit as st
+
+from character import ABILITIES, ANCESTRIES, CLASSES, STANDARD_ARRAY, character_stats, roll_scores
+
+ATTRIBUTION = (
+    'This work includes material taken from the System Reference Document 5.1 (“SRD 5.1”) '
+    'by Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. '
+    'The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International '
+    'License available at https://creativecommons.org/licenses/by/4.0/legalcode.'
+)
+
+
+def reset_assignments():
+    for index in range(len(ABILITIES)):
+        st.session_state.pop(f"ability_{index}", None)
+
+
+def reroll():
+    st.session_state.dice = roll_scores()
+    reset_assignments()
+
+
+def select_scores():
+    method = st.radio("Score method", ["Standard array", "Roll 4d6"], horizontal=True,
+                      on_change=reset_assignments)
+    if method == "Roll 4d6":
+        if "dice" not in st.session_state:
+            reroll()
+        st.button("Roll scores", on_click=reroll)
+        dice = st.session_state.dice
+        values = [sum(roll[1:]) for roll in dice]
+        with st.expander("View dice rolls", expanded=True):
             st.table([
                 {"Roll": index + 1, "Kept dice": " + ".join(map(str, roll[1:])),
                  "Dropped": roll[0], "Total": values[index]}
@@ -68,3 +100,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
