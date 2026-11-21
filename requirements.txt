@@ -1,1 +1,2 @@
 yfinance
+streamlit==1.52.2
